@@ -8,6 +8,7 @@ public class Monitor implements RWMonitorInterface {
     private int readersActive;
     private int readersWaiting;
     private int writersActive;
+    private int writersWaiting;
     private ReentrantLock monLock;
     private Condition okToRead;
     private Condition okToWrite;
@@ -16,6 +17,7 @@ public class Monitor implements RWMonitorInterface {
         readersActive = 0;
         writersActive = 0;
         readersWaiting = 0;
+        writersWaiting = 0;
         monLock = new ReentrantLock();
         okToWrite = monLock.newCondition();
         okToRead = monLock.newCondition();
@@ -37,8 +39,9 @@ public class Monitor implements RWMonitorInterface {
                 readersWaiting++;
                 okToRead.await();
             }
+            readersWaiting--;
             readersActive++;
-            System.out.println("Reader entering CS: " + readersActive);
+            //System.out.println("Reader entering CS: " + readersActive);
         }
         catch (InterruptedException e){
             throw new InterruptedException();
@@ -61,10 +64,12 @@ public class Monitor implements RWMonitorInterface {
         monLock.lock();
         try{
             while(!(writersActive == 0 && readersActive == 0)){
+                writersWaiting++;
                 okToWrite.await();
             }
+            writersWaiting--;
             writersActive++;
-            System.out.println("Writer entering CS: " + writersActive);
+            //System.out.println("Writer entering CS: " + writersActive);
         }
         catch (InterruptedException e){
             throw new InterruptedException();
@@ -79,10 +84,16 @@ public class Monitor implements RWMonitorInterface {
         monLock.lock();
         try {
             readersActive--;
-            if (readersActive == 0){
+            if (writersWaiting > 0){
                 okToWrite.signal();
             }
-            System.out.println("Reader leaving CS: " + readersActive);
+            else{
+                okToRead.signal();
+            }
+            /*if (readersActive == 0){
+                okToWrite.signal();
+            }*/
+            //System.out.println("Reader leaving CS: " + readersActive);
         }
         finally {
             monLock.unlock();
@@ -94,7 +105,8 @@ public class Monitor implements RWMonitorInterface {
         monLock.lock();
         try{
             writersActive--;
-            System.out.println("Writer leaving CS: " + writersActive);
+            //System.out.println("Writer leaving CS: " + writersActive);
+            //HIER WORDT DE VOORRANG VAN OPDRACHT 7.4 BEPAALD
             if (readersWaiting > 0){
                 okToRead.signal();
             }

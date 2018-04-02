@@ -77,10 +77,12 @@ public class BallRunnable implements Runnable {
                 if (inCS){
                     if (ball.getRole() == Role.READER){
                         monitor.exitReader();
+                        System.out.println("READER INTERRUPTED IN CRITICAL SECTION");
                     }
                     else
                     {
                         monitor.exitWriter();
+                        System.out.println("WRITER INTERRUPTED IN CRITICAL SECTION");
                     }
                 }
                 Thread.currentThread().interrupt();
