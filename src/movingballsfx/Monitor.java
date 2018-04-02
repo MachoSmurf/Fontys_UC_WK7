@@ -1,13 +1,24 @@
 package movingballsfx;
 
+import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Monitor implements RWMonitorInterface {
 
-    private ReentrantLock writeLock;
+    private int readersActive;
+    private int readersWaiting;
+    private int writersActive;
+    private ReentrantLock monLock;
+    private Condition okToRead;
+    private Condition okToWrite;
 
     public Monitor(){
-        writeLock = new ReentrantLock();
+        readersActive = 0;
+        writersActive = 0;
+        readersWaiting = 0;
+        monLock = new ReentrantLock();
+        okToWrite = monLock.newCondition();
+        okToRead = monLock.newCondition();
     }
 
     /**
@@ -20,7 +31,17 @@ public class Monitor implements RWMonitorInterface {
      */
     @Override
     public void enterReader() throws InterruptedException {
-
+        monLock.lock();
+        try{
+            while(!(readersActive == 0)) {
+                readersWaiting++;
+                okToRead.await();
+                readersWaiting--;
+            }
+        }
+        finally {
+            monLock.unlock();
+        }
     }
 
     /**
@@ -33,16 +54,46 @@ public class Monitor implements RWMonitorInterface {
      */
     @Override
     public void enterWriter() throws InterruptedException {
-
+        monLock.lock();
+        try{
+            while(!(writersActive == 0 && readersActive == 0)){
+                okToWrite.await();
+            }
+            writersActive++;
+        }
+        finally {
+            monLock.unlock();
+        }
     }
 
     @Override
     public void exitReader() {
-
+        monLock.lock();
+        try {
+            readersActive--;
+            if (readersActive == 0){
+                okToWrite.signal();
+            }
+        }
+        finally {
+            monLock.unlock();
+        }
     }
 
     @Override
     public void exitWriter() {
-
+        monLock.lock();
+        try{
+            writersActive--;
+            if (readersWaiting > 0){
+                okToRead.signal();
+            }
+            else{
+                okToWrite.signal();
+            }
+        }
+        finally {
+            monLock.unlock();
+        }
     }
 }

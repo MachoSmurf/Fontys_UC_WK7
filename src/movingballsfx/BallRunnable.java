@@ -13,10 +13,12 @@ package movingballsfx;
  */
 public class BallRunnable implements Runnable {
 
+    private final Monitor monitor;
     private Ball ball;
 
-    public BallRunnable(Ball ball) {
+    public BallRunnable(Ball ball, Monitor monitor) {
         this.ball = ball;
+        this.monitor = monitor;
     }
 
     /**

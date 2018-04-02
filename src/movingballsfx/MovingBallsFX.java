@@ -118,7 +118,7 @@ public class MovingBallsFX extends Application {
             ballArray[index] = b;
             // Changed by Nico Kuijpers
             // Reference to reader-writer monitor
-            Thread t = new Thread(new BallRunnable(b));
+            Thread t = new Thread(new BallRunnable(b, ballMonitor));
             threadArray[index] = t;
             circleArray[index].setVisible(true);
             t.start();
@@ -128,7 +128,7 @@ public class MovingBallsFX extends Application {
             ballArray[index] = b;
             // Changed by Nico Kuijpers
             // Reference to reader-writer monitor
-            Thread t = new Thread(new BallRunnable(b));
+            Thread t = new Thread(new BallRunnable(b, ballMonitor));
             threadArray[index] = t;
             circleArray[index].setVisible(true);
             t.start();
