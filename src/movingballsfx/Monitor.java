@@ -40,6 +40,9 @@ public class Monitor implements RWMonitorInterface {
             readersActive++;
             System.out.println("Reader entering CS: " + readersActive);
         }
+        catch (InterruptedException e){
+            throw new InterruptedException();
+        }
         finally {
             monLock.unlock();
         }
@@ -62,6 +65,9 @@ public class Monitor implements RWMonitorInterface {
             }
             writersActive++;
             System.out.println("Writer entering CS: " + writersActive);
+        }
+        catch (InterruptedException e){
+            throw new InterruptedException();
         }
         finally {
             monLock.unlock();

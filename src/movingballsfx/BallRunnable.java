@@ -15,10 +15,12 @@ public class BallRunnable implements Runnable {
 
     private final Monitor monitor;
     private Ball ball;
+    boolean inCS;
 
     public BallRunnable(Ball ball, Monitor monitor) {
         this.ball = ball;
         this.monitor = monitor;
+        this.inCS = false;
     }
 
     /**
@@ -38,9 +40,11 @@ public class BallRunnable implements Runnable {
                     if (ball.isEnteringCs()){
                         if (ball.getRole() == Role.READER){
                             monitor.enterReader();
+                            inCS = true;
                         }
                         else{
                             monitor.enterWriter();
+                            inCS = true;
                         }
                     }
                 }catch (InterruptedException e){
@@ -54,10 +58,12 @@ public class BallRunnable implements Runnable {
                 if (ball.isLeavingCs()){
                     if (ball.getRole() == Role.READER){
                         monitor.exitReader();
+                        inCS = false;
                     }
                     else
                     {
                         monitor.exitWriter();
+                        inCS = false;
                     }
                 }
                 
@@ -68,6 +74,15 @@ public class BallRunnable implements Runnable {
                 // and for all possible roles of a ball
                 
                 // TODO by you!
+                if (inCS){
+                    if (ball.getRole() == Role.READER){
+                        monitor.exitReader();
+                    }
+                    else
+                    {
+                        monitor.exitWriter();
+                    }
+                }
                 Thread.currentThread().interrupt();
                 Thread.currentThread().interrupt();
             }
