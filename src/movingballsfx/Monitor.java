@@ -33,11 +33,12 @@ public class Monitor implements RWMonitorInterface {
     public void enterReader() throws InterruptedException {
         monLock.lock();
         try{
-            while(!(readersActive == 0)) {
+            while(!(writersActive == 0)) {
                 readersWaiting++;
                 okToRead.await();
-                readersWaiting--;
             }
+            readersActive++;
+            System.out.println("Reader entering CS: " + readersActive);
         }
         finally {
             monLock.unlock();
@@ -60,6 +61,7 @@ public class Monitor implements RWMonitorInterface {
                 okToWrite.await();
             }
             writersActive++;
+            System.out.println("Writer entering CS: " + writersActive);
         }
         finally {
             monLock.unlock();
@@ -74,6 +76,7 @@ public class Monitor implements RWMonitorInterface {
             if (readersActive == 0){
                 okToWrite.signal();
             }
+            System.out.println("Reader leaving CS: " + readersActive);
         }
         finally {
             monLock.unlock();
@@ -85,6 +88,7 @@ public class Monitor implements RWMonitorInterface {
         monLock.lock();
         try{
             writersActive--;
+            System.out.println("Writer leaving CS: " + writersActive);
             if (readersWaiting > 0){
                 okToRead.signal();
             }

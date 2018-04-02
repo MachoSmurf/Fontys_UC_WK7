@@ -34,10 +34,32 @@ public class BallRunnable implements Runnable {
                 
                 // TODO: entering c.s.
                 // tip: rethrow exceptions so they are handled by catch block below
+                try{
+                    if (ball.isEnteringCs()){
+                        if (ball.getRole() == Role.READER){
+                            monitor.enterReader();
+                        }
+                        else{
+                            monitor.enterWriter();
+                        }
+                    }
+                }catch (InterruptedException e){
+                    throw new InterruptedException();
+                }
                 
                 
                 // TODO: leaving c.s.
                 // tip: rethrow exceptions so they are handled by catch block below
+
+                if (ball.isLeavingCs()){
+                    if (ball.getRole() == Role.READER){
+                        monitor.exitReader();
+                    }
+                    else
+                    {
+                        monitor.exitWriter();
+                    }
+                }
                 
                 Thread.sleep(ball.getSpeed());
                 
@@ -46,7 +68,6 @@ public class BallRunnable implements Runnable {
                 // and for all possible roles of a ball
                 
                 // TODO by you!
-                
                 Thread.currentThread().interrupt();
                 Thread.currentThread().interrupt();
             }
