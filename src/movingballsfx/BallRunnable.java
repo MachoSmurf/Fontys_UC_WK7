@@ -16,11 +16,13 @@ public class BallRunnable implements Runnable {
     private final Monitor monitor;
     private Ball ball;
     boolean inCS;
+    BallState state;
 
     public BallRunnable(Ball ball, Monitor monitor) {
         this.ball = ball;
         this.monitor = monitor;
         this.inCS = false;
+        state = BallState.OUT_CS;
     }
 
     /**
@@ -39,12 +41,16 @@ public class BallRunnable implements Runnable {
                 try{
                     if (ball.isEnteringCs()){
                         if (ball.getRole() == Role.READER){
+                            state = BallState.WAITING;
                             monitor.enterReader();
                             inCS = true;
+                            state = BallState.IN_CS;
                         }
                         else{
+                            state = BallState.WAITING;
                             monitor.enterWriter();
                             inCS = true;
+                            state = BallState.IN_CS;
                         }
                     }
                 }catch (InterruptedException e){
@@ -59,11 +65,14 @@ public class BallRunnable implements Runnable {
                     if (ball.getRole() == Role.READER){
                         monitor.exitReader();
                         inCS = false;
+
+                        state = BallState.OUT_CS;
                     }
                     else
                     {
                         monitor.exitWriter();
                         inCS = false;
+                        state = BallState.OUT_CS;
                     }
                 }
                 
@@ -74,7 +83,7 @@ public class BallRunnable implements Runnable {
                 // and for all possible roles of a ball
                 
                 // TODO by you!
-                if (inCS){
+                if (state == BallState.WAITING || state == BallState.IN_CS){
                     if (ball.getRole() == Role.READER){
                         monitor.exitReader();
                         System.out.println("READER INTERRUPTED IN CRITICAL SECTION");

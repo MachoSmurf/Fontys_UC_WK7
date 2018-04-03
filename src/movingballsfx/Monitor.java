@@ -38,8 +38,8 @@ public class Monitor implements RWMonitorInterface {
             while(!(writersActive == 0)) {
                 readersWaiting++;
                 okToRead.await();
+                readersWaiting--;
             }
-            readersWaiting--;
             readersActive++;
             //System.out.println("Reader entering CS: " + readersActive);
         }
@@ -66,8 +66,8 @@ public class Monitor implements RWMonitorInterface {
             while(!(writersActive == 0 && readersActive == 0)){
                 writersWaiting++;
                 okToWrite.await();
+                writersWaiting--;
             }
-            writersWaiting--;
             writersActive++;
             //System.out.println("Writer entering CS: " + writersActive);
         }
